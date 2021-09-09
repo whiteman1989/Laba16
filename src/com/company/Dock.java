@@ -1,48 +1,31 @@
 package com.company;
 
-import java.sql.Time;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Dock {
-    List<Ship> ships;
-    int cargo = 0;
-    private Lock lock = new ReentrantLock();
+    private List<Ship> ships;
+    private int cargo = 0;
+    private String name;
+    private ReentrantLock lock = new ReentrantLock();
+    private boolean isLock =false;
 
-    public Dock(List<Ship> ships) {
+    public Dock(List<Ship> ships, String name) {
+        this.name = name;
         this.ships = ships;
     }
 
-    public void uploadCargo() {
-        while (!ships.isEmpty()) {
-            lock.lock();
-            System.out.println("Dock locked");
-            try {
-                var ship = ships.get(0);
-                while (ship.getCargoCount() > 0) {
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    cargo += ship.uploadCargo(1);
-                    System.out.println("-> uploaded: " + cargo + " units of cargo from "  + ship.getName()+" ship ");
-                }
-                ships.remove(ship);
-                System.out.println("--> Ship " + ship.getName() + "nul" + "uploaded");
-            }
-            finally {
-                lock.unlock();
-                System.out.println("Dock unlocked");
-            }
-        }
+    public Dock(String name) {
+        this.ships = new ArrayList<>();
+        this.name = name;
     }
 
     public void uploadShip(Ship ship) {
+        isLock = true;
         lock.lock();
-        System.out.println("Dock locked");
+        System.out.println("Dock \"" +name+"\" locked");
         try {
             while (ship.getCargoCount() > 0) {
                 try {
@@ -51,14 +34,23 @@ public class Dock {
                     e.printStackTrace();
                 }
                 cargo += ship.uploadCargo(1);
-                System.out.println("-> uploaded: " + cargo + " units of cargo from "  + ship.getName()+" ship ");
+                System.out.println("-> uploaded: " + cargo + " units of cargo from "  + ship.getName()+" ship in dock "+name);
             }
-            System.out.println("--> Ship " + ship.getName() + "nul" + "uploaded");
+            System.out.println("--> Ship " + ship.getName() + " uploaded in dock "+name);
         }
         finally {
             lock.unlock();
-            System.out.println("Dock unlocked");
+            System.out.println("Dock \"" +name+"\" unlocked");
+            isLock = false;
         }
+    }
+
+    public boolean isLocked() {
+        return isLock;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

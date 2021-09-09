@@ -11,15 +11,28 @@ public class Main {
         ships.add(new Ship("first", 10));
         ships.add(new Ship("second", 10));
         ships.add(new Ship("third", 10));
+        ships.add(new Ship("first23", 10));
+        ships.add(new Ship("second24", 10));
+        ships.add(new Ship("third34", 10));
 
-        Dock dock = new Dock(ships);
+        Dock dock1 = new Dock("A");
+        Dock dock2 = new Dock("B");
 
-        Thread upload1 = new Thread(() -> dock.uploadShip(ships.get(0)));
-        Thread upload2 = new Thread(() -> dock.uploadShip(ships.get(1)));
-        Thread upload3 = new Thread(() -> dock.uploadShip(ships.get(2)));
+        List<Dock> docks = new ArrayList<>();
+        docks.add(dock1);
+        docks.add(dock2);
 
-        upload1.start();
-        upload2.start();
-        upload3.start();
+        while (!ships.isEmpty()) {
+            var ship = ships.get(0);
+            for (Dock d: docks ) {
+                if(!d.isLocked()) {
+                    Thread thr =  new Thread(()->d.uploadShip(ship));
+                    thr.start();
+                    ships.remove(ship);
+                    break;
+                }
+            }
+        }
+
     }
 }
